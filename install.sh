@@ -1,5 +1,18 @@
 #!/bin/sh
 
+FORCE=0
+for arg in "$@"; do
+  case "$arg" in
+    -f|--force)
+      FORCE=1
+      ;;
+    *)
+      echo "Error: Unknown option: $arg"
+      exit 1
+      ;;
+  esac
+done
+
 SRC_DIR="src"
 DEST_DIR="$HOME/.config/opencode"
 
@@ -19,23 +32,29 @@ fi
 
 FLAG_FILE=$(mktemp)
 
-echo "$FIND_OUTPUT" | while IFS= read -r src_file; do
-  rel_path=$(echo "$src_file" | sed "s|^$SRC_DIR/||")
-  dest_file="$DEST_DIR/$rel_path"
-  if [ -e "$dest_file" ]; then
-    echo "Error: File already exists: $dest_file"
-    echo "1" > "$FLAG_FILE"
-  fi
-done
-
-if [ -s "$FLAG_FILE" ]; then
+if [ "$FORCE" -eq 1 ]; then
   rm -f "$FLAG_FILE"
-  echo ""
-  echo "Installation aborted."
-  echo "To fix this, please remove, rename, or backup the conflicting files in $DEST_DIR, then try again."
-  exit 1
+  echo "Force mode enabled: existing files will be overwritten."
+else
+  echo "$FIND_OUTPUT" | while IFS= read -r src_file; do
+    rel_path=$(echo "$src_file" | sed "s|^$SRC_DIR/||")
+    dest_file="$DEST_DIR/$rel_path"
+    if [ -e "$dest_file" ]; then
+      echo "Error: File already exists: $dest_file"
+      echo "1" > "$FLAG_FILE"
+    fi
+  done
+
+  if [ -s "$FLAG_FILE" ]; then
+    rm -f "$FLAG_FILE"
+    echo ""
+    echo "Installation aborted."
+    echo "To fix this, please remove, rename, or backup the conflicting files in $DEST_DIR, then try again."
+    echo "Or re-run with --force to overwrite them."
+    exit 1
+  fi
+  rm -f "$FLAG_FILE"
 fi
-rm -f "$FLAG_FILE"
 
 echo "$FIND_OUTPUT" | while IFS= read -r src_file; do
   rel_path=$(echo "$src_file" | sed "s|^$SRC_DIR/||")

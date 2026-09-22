@@ -1,3 +1,7 @@
+param(
+    [switch]$Force
+)
+
 $ErrorActionPreference = "Stop"
 
 $SrcDir = "src"
@@ -18,20 +22,26 @@ if ($Files.Count -eq 0 -or $Files -eq $null) {
 $HasConflict = $false
 $SrcPathLength = (Resolve-Path $SrcDir).Path.Length
 
-foreach ($File in $Files) {
-    $RelPath = $File.FullName.Substring($SrcPathLength).TrimStart('\', '/')
-    $DestPath = Join-Path $DestDir $RelPath
-
-    if (Test-Path $DestPath) {
-        Write-Host "Error: File already exists: $DestPath" -ForegroundColor Red
-        $HasConflict = $true
-    }
+if ($Force) {
+    Write-Host "Force mode enabled: existing files will be overwritten." -ForegroundColor Yellow
 }
+else {
+    foreach ($File in $Files) {
+        $RelPath = $File.FullName.Substring($SrcPathLength).TrimStart('\', '/')
+        $DestPath = Join-Path $DestDir $RelPath
 
-if ($HasConflict) {
-    Write-Host "`nInstallation aborted." -ForegroundColor Yellow
-    Write-Host "To fix this, please remove, rename, or backup the conflicting files in $DestDir, then try again." -ForegroundColor Yellow
-    exit 1
+        if (Test-Path $DestPath) {
+            Write-Host "Error: File already exists: $DestPath" -ForegroundColor Red
+            $HasConflict = $true
+        }
+    }
+
+    if ($HasConflict) {
+        Write-Host "`nInstallation aborted." -ForegroundColor Yellow
+        Write-Host "To fix this, please remove, rename, or backup the conflicting files in $DestDir, then try again." -ForegroundColor Yellow
+        Write-Host "Or re-run with -Force to overwrite them." -ForegroundColor Yellow
+        exit 1
+    }
 }
 
 foreach ($File in $Files) {
