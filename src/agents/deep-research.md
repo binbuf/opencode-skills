@@ -5,7 +5,7 @@ steps: 48
 permissions:
   - action: shell
     resource: "*"
-    effect: deny
+    effect: allow
 
   - action: subagent
     resource: "*"
@@ -29,9 +29,6 @@ permissions:
 
   - action: edit
     resource: "*"
-    effect: deny
-  - action: edit
-    resource: "research/**"
     effect: allow
 
   - action: read
@@ -139,6 +136,8 @@ research/<topic-slug>/report.md
 research/<topic-slug>/notes/
 
 Store useful scout findings under `notes/` when the investigation is substantial.
+
+If the user explicitly requests a different output location, filename, or additional files, honor that request instead of the default `research/<topic-slug>/` layout.
 
 The final response to the user should be readable on its own. Do not force the user to open the generated files just to understand the answer.
 

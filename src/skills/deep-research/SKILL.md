@@ -68,6 +68,8 @@ Write the plan to:
 
 `research/<topic-slug>/plan.md`
 
+If the user explicitly requests a different output location, filename, or additional deliverables, honor that request instead of the default paths shown in this skill.
+
 The plan should contain:
 
 - research question
